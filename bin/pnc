@@ -1,0 +1,9 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use App::pnc;
+
+@ARGV == 2 or die "Usage:\n    $0 host port\n\n";
+App::pnc::netcat4(@ARGV);
+

@@ -1,38 +1,125 @@
 package App::pnc;
 
-use 5.012004;
 use strict;
 use warnings;
 
-require Exporter;
+use Socket;
+use Carp;
+use Fcntl qw(F_GETFL F_SETFL O_NONBLOCK);
+use Errno qw(ENOTSOCK);
 
-our @ISA = qw(Exporter);
+our $max_buffer_size = 64 * 1024;
 
-# Items to export into callers namespace by default. Note: do not export
-# names by default without a very good reason. Use EXPORT_OK instead.
-# Do not simply export all your public functions/methods/constants.
+sub netcat4 {
+    my ($server, $port) = @_;
+    if ($port =~ /\D/) {
+        $port = getservbyname($port, 'tcp')
+            or croak "unable to convert service name to port number: $!";
+    }
+    my $iaddr = inet_aton($server) or croak "unable to resolve host name: $!";
+    my $paddr = sockaddr_in($port, $iaddr);
+    socket (my $socket, AF_INET, SOCK_STREAM, 0) or croak "unable to create socket: $!";
+    connect ($socket, $paddr) or croak "unable to connect to host: $!";
 
-# This allows declaration	use App::pnc ':all';
-# If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
-# will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(
-	
-) ] );
+    _netcat($socket);
+}
 
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+sub netcat6 {
+    #my ($server, $port) = @_;
+    #_netcat($server, AF_INET6, $port);
+    croak "not implemented yet!";
+}
 
-our @EXPORT = qw(
-	
-);
+sub _shutdown {
+    my ($socket, $dir) = @_;
+    unless (shutdown($socket, $dir)) {
+        if ($! == ENOTSOCK) {
+            return close ($socket);
+        }
+    }
+    undef;
+}
 
-our $VERSION = '0.01';
+sub _netcat {
+    my $socket = shift;
 
+    for my $fh ($socket, *STDIN, *STDOUT) {
+        my $flags = fcntl($fh, F_GETFL, 0);
+        fcntl($fh, F_SETFL, fcntl($fh, F_GETFL, 0) | O_NONBLOCK);
+        binmode $fh;
+    }
 
-# Preloaded methods go here.
+    my @in = (*STDIN, $socket);
+    my @out = ($socket, *STDOUT);
+    my @buffer = ('', '');
+
+    my @in_open = (1, 1);
+    my @out_open = (1, 1);
+
+    local $SIG{PIPE} = 'IGNORE';
+
+    while (grep $_, @in_open, @out_open) {
+        my $iv = '';
+        my $ov = '';
+        for my $ix (0, 1) {
+            if ($in_open[$ix] and length $buffer[$ix] < $max_buffer_size) {
+                vec($iv, fileno($in[$ix]), 1) = 1;
+            }
+            if ($out_open[$ix] and length $buffer[$ix] > 0) {
+                vec($ov, fileno($out[$ix]), 1) = 1;
+            }
+        }
+        if (select($iv, $ov, undef, 5) > 0) {
+            for my $ix (0, 1) {
+                if ($in_open[$ix] and vec($iv, fileno($in[$ix]), 1)) {
+                    my $bytes = sysread($in[$ix], $buffer[$ix], 16 * 1024, length $buffer[$ix]);
+                    unless ($bytes) {
+                        $in_open[$ix] = 0;
+                        _shutdown($in[$ix], 0);
+                        unless (length $buffer[$ix]) {
+                            $out_open[$ix] = 0;
+                            _shutdown($out[$ix], 1);
+                        }
+                    }
+                }
+                if ($out_open[$ix] and vec($ov, fileno($out[$ix]), 1)) {
+                    my $bytes = syswrite($out[$ix], $buffer[$ix], 16 * 1024);
+                    if ($bytes) {
+                        substr($buffer[$ix], 0, $bytes, '');
+                        unless ($in_open[$ix] or length $buffer[$ix]) {
+                            $out_open[$ix] = 0;
+                            _shutdown($out[$ix], 1);
+                        }
+                    }
+                    else {
+                        $out_open[$ix] = 0;
+                        _shutdown($out[$ix], 1);
+                        $buffer[$ix] = '';
+                        if ($in_open[$ix]) {
+                            $in_open[$ix] = 0;
+                            _shutdown($in[$ix], 0);
+                        }
+                    }
+                }
+            }
+        }
+        # print STDERR Dumper({ in_open => \@in_open, out_open => \@out_open });
+    }
+
+    for my $fd ($socket, *STDIN, *STDOUT) {
+        close $fd;
+    }
+}
+
+unless (defined caller) {
+    @ARGV == 2 or die "Usage:\n    $0 host port\n\n";
+    netcat4(@ARGV);
+}
+
 
 1;
+
 __END__
-# Below is stub documentation for your module. You'd better edit it!
 
 =head1 NAME
 
