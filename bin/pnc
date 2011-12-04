@@ -5,7 +5,7 @@ use warnings;
 use App::pnc;
 
 if (@ARGV == 1 and $ARGV[0] eq '-V') {
-    App::pnc::version();
+    print App::pnc::version();
 }
 elsif (@ARGV == 2) {
     App::pnc::netcat4(@ARGV);
