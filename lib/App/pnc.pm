@@ -1,5 +1,7 @@
 package App::pnc;
 
+our $VERSION = '0.02';
+
 use strict;
 use warnings;
 
@@ -103,17 +105,22 @@ sub _netcat {
                 }
             }
         }
-        # print STDERR Dumper({ in_open => \@in_open, out_open => \@out_open });
     }
-
     for my $fd ($socket, *STDIN, *STDOUT) {
         close $fd;
     }
 }
 
 unless (defined caller) {
-    @ARGV == 2 or die "Usage:\n    $0 host port\n\n";
-    netcat4(@ARGV);
+    if (@ARGV == 1 and $ARGV[0] eq '-V') {
+        print "pnc $VERSION, a netcat alike program written in Perl\n\n";
+    }
+    elsif (@ARGV == 2) {
+        netcat4(@ARGV);
+    }
+    else {
+        @ARGV == 2 or die "Usage:\n    pnc host port\n\n";
+    }
 }
 
 
