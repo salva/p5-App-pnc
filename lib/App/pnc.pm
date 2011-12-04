@@ -130,45 +130,27 @@ __END__
 
 =head1 NAME
 
-App::pnc - Perl extension for blah blah blah
+App::pnc - Simple netcat clone implemented in Perl.
 
 =head1 SYNOPSIS
 
   use App::pnc;
-  blah blah blah
+  App::pnc::netcat4($host, $port);
 
 =head1 DESCRIPTION
 
-Stub documentation for App::pnc, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+This is a simple netcat alike program written in Perl.
 
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
-
+It has no dependencies besides Perl 5.005 and uses a simple file so
+that it can be easily copied into a remote system.
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
-
-=head1 AUTHOR
-
-Salvador Fandino, E<lt>salva@E<gt>
+L<Net::OpenSSH::Gateway>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011 by Salvador Fandino
+Copyright (C) 2011 by Salvador Fandino, E<lt>sfandino@yahoo.com<gt>.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.12.4 or,
