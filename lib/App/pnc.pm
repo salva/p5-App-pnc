@@ -111,7 +111,7 @@ sub _netcat {
     }
 }
 
-sub version { "pnc $VERSION, a netcat alike program written in Perl\n\n" }
+sub version { "pnc $VERSION - a netcat alike program written in Perl\n\n" }
 
 unless (defined caller) {
     if (@ARGV == 1 and $ARGV[0] eq '-V') {
