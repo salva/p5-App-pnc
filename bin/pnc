@@ -4,6 +4,12 @@ use strict;
 use warnings;
 use App::pnc;
 
-@ARGV == 2 or die "Usage:\n    $0 host port\n\n";
-App::pnc::netcat4(@ARGV);
-
+if (@ARGV == 1 and $ARGV[0] eq '-V') {
+    App::pnc::version();
+}
+elsif (@ARGV == 2) {
+    App::pnc::netcat4(@ARGV);
+}
+else {
+    die "Usage:\n    $0 host port\n\n";
+}
