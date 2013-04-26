@@ -140,6 +140,11 @@ App::pnc - Simple netcat clone implemented in Perl.
 
 =head1 SYNOPSIS
 
+  # from the command line:
+  perl lib/App/pnc.pm www.python.org 80
+
+
+  # as a Perl module:
   use App::pnc qw(netcat4 netcat_socket);
 
   # connects to the given host and port and forwards everything to
