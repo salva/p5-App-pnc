@@ -4,3 +4,4 @@ MANIFEST
 README
 t/App-pnc.t
 lib/App/pnc.pm
+t/pods.t
