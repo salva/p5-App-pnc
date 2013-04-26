@@ -163,13 +163,12 @@ that it can be easily copied into a remote system.
 
 =head1 SEE ALSO
 
-L<pnc>.
-
 L<Net::OpenSSH::Gateway>, L<IO::Socket::Forwarder>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011 by Salvador Fandino, E<lt>sfandino@yahoo.com<gt>.
+Copyright (C) 2011, 2013 by Salvador FandiE<ntilde>o,
+E<lt>sfandino@yahoo.com<gt>.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.12.4 or,
