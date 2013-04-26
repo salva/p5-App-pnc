@@ -12,6 +12,10 @@ use Errno qw(ENOTSOCK);
 
 our $max_buffer_size = 64 * 1024;
 
+require Exporter;
+our @ISA = qw(Exporter);
+our @EXPORT_OK = qw(netcat4 netcat_socket);
+
 sub netcat4 {
     my ($server, $port) = @_;
     if ($port =~ /\D/) {
@@ -23,12 +27,12 @@ sub netcat4 {
     socket (my $socket, AF_INET, SOCK_STREAM, 0) or croak "unable to create socket: $!";
     connect ($socket, $paddr) or croak "unable to connect to host: $!";
 
-    _netcat($socket);
+    netcat_socket($socket);
 }
 
 sub netcat6 {
     #my ($server, $port) = @_;
-    #_netcat($server, AF_INET6, $port);
+    #netcat_socket($server, AF_INET6, $port);
     croak "not implemented yet!";
 }
 
@@ -42,7 +46,7 @@ sub _shutdown {
     undef;
 }
 
-sub _netcat {
+sub netcat_socket {
     my $socket = shift;
 
     for my $fh ($socket, *STDIN, *STDOUT) {
@@ -136,8 +140,14 @@ App::pnc - Simple netcat clone implemented in Perl.
 
 =head1 SYNOPSIS
 
-  use App::pnc;
-  App::pnc::netcat4($host, $port);
+  use App::pnc qw(netcat4 netcat_socket);
+
+  # connects to the given host and port and forwards everything to
+  # STDOUT/STDIN:
+  netcat4($host, $port);
+
+  # forwards data between the given socket and STDOUT/STDIN:
+  netcat_socket($socket);
 
 =head1 DESCRIPTION
 
@@ -148,7 +158,9 @@ that it can be easily copied into a remote system.
 
 =head1 SEE ALSO
 
-L<Net::OpenSSH::Gateway>.
+L<pnc>.
+
+L<Net::OpenSSH::Gateway>, L<IO::Socket::Forwarder>.
 
 =head1 COPYRIGHT AND LICENSE
 
